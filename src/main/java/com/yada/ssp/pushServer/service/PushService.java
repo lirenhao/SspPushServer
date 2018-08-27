@@ -80,12 +80,12 @@ public class PushService {
                 "", UUID.randomUUID());
         try {
             if (!apnsClient.sendNotification(pushNotification).get().isAccepted()) {
-                logger.warn("APNS推送消息失败,设备码是[%s]", deviceToken);
+                logger.warn("APNS推送消息失败,设备码是[{}]", deviceToken);
                 // 添加队列
                 jmsTemplate.convertAndSend(mqProperties.getThrowQueue(), mapToStr(data));
             }
         } catch (InterruptedException | ExecutionException e) {
-            logger.warn("APNS推送消息异常,设备码是[%s],异常信息是[%s]", deviceToken, e.getMessage());
+            logger.warn("APNS推送消息异常,设备码是[{}],异常信息是[{}]", deviceToken, e.getMessage());
             // 添加队列
             jmsTemplate.convertAndSend(mqProperties.getThrowQueue(), mapToStr(data));
         }
@@ -109,7 +109,7 @@ public class PushService {
         try {
             FirebaseMessaging.getInstance().sendAsync(message).get();
         } catch (InterruptedException | ExecutionException e) {
-            logger.warn("APNS推送消息异常,设备码是[%s],异常信息是[%s]", deviceToken, e.getMessage());
+            logger.warn("APNS推送消息异常,设备码是[{}],异常信息是[{}]", deviceToken, e.getMessage());
             // 添加队列
             jmsTemplate.convertAndSend(mqProperties.getThrowQueue(), mapToStr(data));
         }
@@ -126,8 +126,12 @@ public class PushService {
         String[] fields = mqProperties.getDataField();
         String[] values = data.split(mqProperties.getDataRegex());
         Map<String, String> tran = new HashMap<>();
-        for (int i = 0; i < fields.length; i++) {
-            tran.put(fields[i], values[i]);
+        try {
+            for (int i = 0; i < fields.length; i++) {
+                tran.put(fields[i], values[i]);
+            }
+        } catch (Exception e) {
+            logger.error("推送数据解析失败,数据是[{}]", data);
         }
         return tran;
     }

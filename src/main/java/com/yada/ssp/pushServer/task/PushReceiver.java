@@ -20,12 +20,12 @@ public class PushReceiver {
 
     @JmsListener(destination = "${mq.tranQueue}", containerFactory = "mqFactory")
     public void tranMessage(byte[] msg) {
-        logger.info("MQ获取的信息[%s]", new String(msg));
+        logger.info("MQ获取的信息[{}]", new String(msg));
         pushService.push(pushService.strToMap(new String(msg)));
     }
 
     @JmsListener(destination = "${mq.throwQueue}", containerFactory = "mqFactory")
     public void throwMessage(byte[] msg) {
-        logger.info("MQ获取的信息[%s]", new String(msg));
+        logger.info("MQ获取的信息[{}]", new String(msg));
     }
 }
