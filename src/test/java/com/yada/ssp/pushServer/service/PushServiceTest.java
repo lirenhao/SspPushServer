@@ -53,9 +53,9 @@ public class PushServiceTest {
 
         Assert.assertEquals("104123412341234", tran.get("merNo"));
         Assert.assertEquals("20180827185959", tran.get("tranDate"));
-        Assert.assertEquals("1", tran.get("tranType"));
+        Assert.assertEquals("1", tran.get("channel"));
         Assert.assertEquals("100", tran.get("tranAmt"));
-        Assert.assertEquals("2", tran.get("tran"));
+        Assert.assertEquals("2", tran.get("tranCry"));
         Assert.assertEquals("1234567890", tran.get("tranNo"));
         Assert.assertEquals("66666666", tran.get("rrn"));
     }
@@ -65,8 +65,9 @@ public class PushServiceTest {
         Map<String, String> tran = new HashMap<>();
         tran.put("merNo", "merNo");
         tran.put("tranDate", "tranDate");
-        tran.put("tranType", "tranType");
+        tran.put("channel", "channel");
         tran.put("tranAmt", "tranAmt");
+        tran.put("tranCry", "tranCry");
         tran.put("tranNo", "tranNo");
         tran.put("rrn", "rrn");
 
@@ -75,8 +76,9 @@ public class PushServiceTest {
 
         Assert.assertEquals(tran.get("merNo"), param.get("merNo"));
         Assert.assertEquals(tran.get("tranDate"), param.get("tranDate"));
-        Assert.assertEquals(tran.get("tranType"), param.get("tranType"));
+        Assert.assertEquals(tran.get("channel"), param.get("channel"));
         Assert.assertEquals(tran.get("tranAmt"), param.get("tranAmt"));
+        Assert.assertEquals(tran.get("tranCry"), param.get("tranCry"));
         Assert.assertEquals(tran.get("tranNo"), param.get("tranNo"));
         Assert.assertEquals(tran.get("rrn"), param.get("rrn"));
     }
