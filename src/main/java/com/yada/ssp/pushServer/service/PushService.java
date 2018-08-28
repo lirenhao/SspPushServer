@@ -125,7 +125,7 @@ public class PushService {
      * @return 字段映射
      */
     public Map<String, String> tranToMap(String data) {
-        // 商户号、交易时间(YYYYMMDDmmhhss)、支付方式、交易金额、交易币种、交易单号、检索参考号
+        // 商户号、交易时间(YYYYMMDDmmhhss)、支付方式、交易渠道、交易金额、交易币种、交易单号、检索参考号
         String[] fields = mqProperties.getDataField();
         Map<String, String> tran = new HashMap<>();
         try {
