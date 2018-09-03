@@ -30,7 +30,7 @@ public class PushServiceTest {
     @MockBean
     private ApnsClient apnsClient;
     @MockBean
-    private JmsTemplate jmsTemplate;
+    private NotifyErrService notifyErrService;
     @Autowired
     private MqProperties mqProperties;
     @Autowired
@@ -42,7 +42,7 @@ public class PushServiceTest {
 
     @Before
     public void before() {
-        pushService = new PushService(deviceDao, apnsClient, jmsTemplate,
+        pushService = new PushService(deviceDao, apnsClient, notifyErrService,
                 mqProperties, apnsProperties, fcmProperties);
     }
 

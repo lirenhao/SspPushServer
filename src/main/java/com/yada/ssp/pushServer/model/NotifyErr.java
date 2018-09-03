@@ -4,7 +4,6 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "T_L_APP_NOTIFY_ERR")
-@IdClass(DevicePK.class)
 public class NotifyErr {
 
     // 发送的数据

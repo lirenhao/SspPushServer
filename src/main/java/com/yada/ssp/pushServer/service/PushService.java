@@ -65,7 +65,11 @@ public class PushService {
     public void pushErr(String notify) {
         Map<String, String> data = strToMap(notify);
         List<Device> devices = deviceDao.findByDeviceNo(data.get("deviceNo"));
-        push(devices, data);
+        if(devices.size() > 0) {
+            push(devices, data);
+        } else {
+            notifyErrService.delete(notify);
+        }
     }
 
     private void push(List<Device> devices, Map<String, String> data){

@@ -28,6 +28,8 @@ public class PushReceiver {
 
     @Value("${notify.err.num}")
     private int errNum;
+    @Value("${notify.err.expire}")
+    private int errExpire;
 
     @JmsListener(destination = "${mq.tranQueue}", containerFactory = "mqFactory")
     public void tranMessage(byte[] msg) {
@@ -38,7 +40,7 @@ public class PushReceiver {
 
     @Scheduled(cron = "${notify.err.cron}")
     public void throwMessage() {
-        List<NotifyErr> errList = notifyErrService.getNotifyErr(errNum);
+        List<NotifyErr> errList = notifyErrService.getNotifyErr(errNum, errExpire);
         for(NotifyErr err: errList) {
             logger.info("数据库获取的发送错误信息[{}]", err.getNotifydata());
             pushService.pushErr(err.getNotifydata());

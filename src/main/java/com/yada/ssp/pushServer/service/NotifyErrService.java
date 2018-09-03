@@ -28,9 +28,8 @@ public class NotifyErrService {
         notifyErrDao.saveAndFlush(err);
     }
 
-    public List<NotifyErr> getNotifyErr(int retryNo) {
-        // TODO 时间判断
-        return notifyErrDao.findByRetryNoLessThanEqual(retryNo);
+    public List<NotifyErr> getNotifyErr(int num, int expire) {
+        return notifyErrDao.findByRetryNoLessThanEqual(num);
     }
 
     public void delete(String notifydata) {
