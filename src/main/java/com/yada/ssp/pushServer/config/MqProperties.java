@@ -10,7 +10,6 @@ public class MqProperties {
     private String dataRegex;
     private String[] dataField;
     private String tranQueue;
-    private String throwQueue;
 
     public String getDataRegex() {
         return dataRegex;
@@ -34,13 +33,5 @@ public class MqProperties {
 
     public void setTranQueue(String tranQueue) {
         this.tranQueue = tranQueue;
-    }
-
-    public String getThrowQueue() {
-        return throwQueue;
-    }
-
-    public void setThrowQueue(String throwQueue) {
-        this.throwQueue = throwQueue;
     }
 }

@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.jms.core.JmsTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -39,25 +38,37 @@ public class PushService {
 
     private final DeviceDao deviceDao;
     private final ApnsClient apnsClient;
-    private final JmsTemplate jmsTemplate;
+    private final NotifyErrService notifyErrService;
     private final MqProperties mqProperties;
     private final ApnsProperties apnsProperties;
     private final FcmProperties fcmProperties;
 
     @Autowired
-    public PushService(DeviceDao deviceDao, ApnsClient apnsClient, JmsTemplate jmsTemplate,
+    public PushService(DeviceDao deviceDao, ApnsClient apnsClient, NotifyErrService notifyErrService,
                        MqProperties mqProperties, ApnsProperties apnsProperties, FcmProperties fcmProperties) {
         this.deviceDao = deviceDao;
         this.apnsClient = apnsClient;
-        this.jmsTemplate = jmsTemplate;
+        this.notifyErrService = notifyErrService;
         this.mqProperties = mqProperties;
         this.apnsProperties = apnsProperties;
         this.fcmProperties = fcmProperties;
     }
 
     @Async
-    public void push(Map<String, String> data) {
+    public void push(String notify) {
+        Map<String, String> data = tranToMap(notify);
         List<Device> devices = deviceDao.findByMerNo(data.get("merNo"));
+        push(devices, data);
+    }
+
+    @Async
+    public void pushErr(String notify) {
+        Map<String, String> data = strToMap(notify);
+        List<Device> devices = deviceDao.findByDeviceNo(data.get("deviceNo"));
+        push(devices, data);
+    }
+
+    private void push(List<Device> devices, Map<String, String> data){
         for (Device device : devices) {
             switch (device.getPushType()) {
                 case "FCM":
@@ -70,7 +81,8 @@ public class PushService {
         }
     }
 
-    public void sendApns(String deviceToken, Map<String, String> data) {
+    private void sendApns(String deviceToken, Map<String, String> data) {
+        data.put("deviceNo", deviceToken);
         ApnsPayloadBuilder payloadBuilder = new ApnsPayloadBuilder();
         payloadBuilder.setAlertTitle(pushTitle);
         payloadBuilder.setAlertBody(pushBody);
@@ -85,17 +97,20 @@ public class PushService {
         try {
             if (!apnsClient.sendNotification(pushNotification).get().isAccepted()) {
                 logger.warn("APNS推送消息失败,设备码是[{}]", deviceToken);
-                // 添加队列
-                jmsTemplate.convertAndSend(mqProperties.getThrowQueue(), mapToStr(data));
+                // 存储数据库
+                notifyErrService.next(mapToStr(data));
+            } else {
+                notifyErrService.delete(mapToStr(data));
             }
         } catch (InterruptedException | ExecutionException e) {
             logger.warn("APNS推送消息异常,设备码是[{}],异常信息是[{}]", deviceToken, e.getMessage());
-            // 添加队列
-            jmsTemplate.convertAndSend(mqProperties.getThrowQueue(), mapToStr(data));
+            // 存储数据库
+            notifyErrService.next(mapToStr(data));
         }
     }
 
-    public void sendFcm(String deviceToken, Map<String, String> data) {
+    private void sendFcm(String deviceToken, Map<String, String> data) {
+        data.put("deviceNo", deviceToken);
         AndroidConfig androidConfig = AndroidConfig.builder()
                 .setTtl(fcmProperties.getTtl())
                 .setPriority(AndroidConfig.Priority.HIGH)
@@ -111,10 +126,11 @@ public class PushService {
 
         try {
             FirebaseMessaging.getInstance().sendAsync(message).get();
+            notifyErrService.delete(mapToStr(data));
         } catch (InterruptedException | ExecutionException e) {
             logger.warn("FCM推送消息异常,设备码是[{}],异常信息是[{}]", deviceToken, e.getMessage());
-            // 添加队列
-            jmsTemplate.convertAndSend(mqProperties.getThrowQueue(), mapToStr(data));
+            // 存储数据库
+            notifyErrService.next(mapToStr(data));
         }
     }
 
@@ -124,10 +140,10 @@ public class PushService {
      * @param data MQ获取的数据
      * @return 字段映射
      */
-    public Map<String, String> tranToMap(String data) {
+    Map<String, String> tranToMap(String data) {
         // 商户号、交易时间(YYYYMMDDmmhhss)、支付方式、交易渠道、交易金额、交易币种、交易单号、检索参考号
         String[] fields = mqProperties.getDataField();
-        Map<String, String> tran = new HashMap<>();
+        Map<String, String> tran = new LinkedHashMap<>();
         try {
             Pattern pattern = Pattern.compile(mqProperties.getDataRegex());
             Matcher matcher = pattern.matcher(data);
@@ -144,7 +160,7 @@ public class PushService {
         return tran;
     }
 
-    public String mapToStr(Map<String, String> data) {
+    String mapToStr(Map<String, String> data) {
         StringBuilder sb = new StringBuilder();
         for (String key : data.keySet()) {
             sb.append(key).append("=").append(data.get(key)).append("&");
@@ -158,9 +174,9 @@ public class PushService {
      * @param data 发送失败的数据
      * @return 字段映射
      */
-    public Map<String, String> strToMap(String data) {
+    Map<String, String> strToMap(String data) {
         String[] values = data.split("&");
-        Map<String, String> tran = new HashMap<>();
+        Map<String, String> tran = new LinkedHashMap<>();
         for (String value : values) {
             String[] param = value.split("=");
             tran.put(param[0], param[1]);
