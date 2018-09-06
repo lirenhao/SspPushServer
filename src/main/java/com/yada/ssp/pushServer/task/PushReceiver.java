@@ -38,7 +38,7 @@ public class PushReceiver {
         pushService.push(notify);
     }
 
-    @Scheduled(cron = "${notify.err.cron}")
+    @Scheduled(fixedRateString = "${notify.err.rate}")
     public void throwMessage() {
         List<NotifyErr> errList = notifyErrService.getNotifyErr(errNum, errExpire);
         for(NotifyErr err: errList) {
