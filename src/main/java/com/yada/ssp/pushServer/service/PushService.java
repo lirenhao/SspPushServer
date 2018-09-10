@@ -85,7 +85,7 @@ public class PushService {
         }
     }
 
-    private void sendApns(String deviceToken, Map<String, String> data) {
+    void sendApns(String deviceToken, Map<String, String> data) {
         data.put("deviceNo", deviceToken);
         ApnsPayloadBuilder payloadBuilder = new ApnsPayloadBuilder();
         payloadBuilder.setAlertTitle(pushTitle);
@@ -113,7 +113,7 @@ public class PushService {
         }
     }
 
-    private void sendFcm(String deviceToken, Map<String, String> data) {
+    void sendFcm(String deviceToken, Map<String, String> data) {
         data.put("deviceNo", deviceToken);
         AndroidConfig androidConfig = AndroidConfig.builder()
                 .setTtl(fcmProperties.getTtl())
