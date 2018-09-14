@@ -15,6 +15,7 @@ public class MqTest {
         MQEnvironment.hostname = "10.2.53.182";
         MQEnvironment.port = 1470;
         MQEnvironment.channel = "SSP.SVRCONN";
+        MQEnvironment.userID = "ssp";
 
         //设置应用名称,方便服务器MQ 查看应用连接
         MQEnvironment.properties.put(MQConstants.APPNAME_PROPERTY, "MQ Test By Java");
@@ -26,7 +27,7 @@ public class MqTest {
         MQQueue putQueue = queueManager.accessQueue("99", CMQC.MQOO_OUTPUT);
 
         //新建并发送消息给队列
-        String tran = "11111";
+        String tran = "10412341234123420180827185959                type         1          100  2                                                      1234567890    66666666";
         MQMessage myMessage = new MQMessage();
         myMessage.writeString(tran);
 
@@ -46,6 +47,7 @@ public class MqTest {
         MQEnvironment.hostname = "10.2.53.182";
         MQEnvironment.port = 1470;
         MQEnvironment.channel = "SSP.SVRCONN";
+        MQEnvironment.userID = "ssp";
 
         //设置应用名称,方便服务器MQ 查看应用连接
         // MQEnvironment.properties.put(MQConstants.APPNAME_PROPERTY, "MQ Test By Java");

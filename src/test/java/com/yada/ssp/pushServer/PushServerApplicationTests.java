@@ -34,15 +34,15 @@ public class PushServerApplicationTests {
 
     @Test
     public void sendApns() {
-        String token = "76ea13ff8b9c237193aa6540ab885093ac33be62fdcfc722771d9e668f472bc5";
+        String token = "1e768ff087d606248d816332053a6303fd821a22c6cfaa02df09012049b1ca0c";
         Map<String, String> data = new HashMap<>();
-        data.put("merNo", "104");
-        data.put("tranDate", "20180907162134");
+        data.put("merNo", "123456789012345");
+        data.put("tranDate", "20180914084823");
         data.put("tranType", "tranType");
-        data.put("channel", "channel");
+        data.put("channel", "微信支付");
         data.put("tranAmt", "10.00");
         data.put("tranCry", "￥");
-        data.put("tranNo", "201809100848230001");
+        data.put("tranNo", "201809140848230001");
         data.put("rrn", "rrn");
         pushService.sendApns(token, data);
     }
