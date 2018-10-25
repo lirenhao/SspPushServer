@@ -68,6 +68,7 @@ public class PushService {
         if(devices.size() > 0) {
             push(devices, data);
         } else {
+            logger.warn("重发没有查询到设备信息,设备码是[{}]", data.get("deviceNo"));
             notifyErrService.delete(notify);
         }
     }
@@ -159,7 +160,7 @@ public class PushService {
                 logger.warn("推送数据解析失败,数据是[{}]", data);
             }
         } catch (Exception e) {
-            logger.warn("推送数据解析失败,数据是[{}]", data, e.getMessage());
+            logger.warn("推送数据解析失败,数据是[{}],异常信息是[{}]", data, e.getMessage());
         }
         return tran;
     }
