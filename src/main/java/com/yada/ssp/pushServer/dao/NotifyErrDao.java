@@ -8,6 +8,4 @@ import java.util.List;
 public interface NotifyErrDao extends JpaRepository<NotifyErr, String> {
 
     List<NotifyErr> findByRetryNoLessThanEqualAndDatetimeGreaterThanEqual(int retryNo, String datetime);
-
-    void deleteByNotifydata(String notifydata);
 }

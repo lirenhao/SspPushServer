@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -14,6 +15,7 @@ public class NotifyErrService {
 
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
     private final NotifyErrDao notifyErrDao;
+    private final List<String> sendList = new ArrayList<>();
 
     @Autowired
     public NotifyErrService(NotifyErrDao notifyErrDao) {
@@ -23,14 +25,16 @@ public class NotifyErrService {
     /**
      * 存储错误处理的下一次处理数据
      *
-     * @param data 存储的数据
+     * @param id 存储的数据
      */
-    public void next(String data) {
-        NotifyErr err = notifyErrDao.findById(data).orElse(new NotifyErr());
-        err.setNotifydata(data);
+    void next(String id) {
+        NotifyErr err = notifyErrDao.findById(id).orElse(new NotifyErr());
+        err.setNotifydata(err.getNotifydata());
         err.setDatetime(sdf.format(new Date()));
         err.setRetryNo(err.getRetryNo() + 1);
         notifyErrDao.saveAndFlush(err);
+        // 发送结束删除发送状态
+        sendList.remove(id);
     }
 
     /**
@@ -49,9 +53,28 @@ public class NotifyErrService {
     /**
      * 发送成功后删除发送错误数据
      *
-     * @param notifydata 错误数据
+     * @param id 错误数据ID
      */
-    public void delete(String notifydata) {
-        notifyErrDao.deleteByNotifydata(notifydata);
+    void delete(String id) {
+        notifyErrDao.deleteById(id);
+        // 发送结束删除发送状态
+        sendList.remove(id);
+    }
+
+    /**
+     * 数据是否正在发送
+     * @param id　数据ID
+     * @return true是正在发送
+     */
+    public boolean isSending(String id) {
+        return sendList.indexOf(id) >= 0;
+    }
+
+    /**
+     * 设置数据正在发送
+     * @param id　数据ID
+     */
+    public void setSending(String id) {
+        sendList.add(id);
     }
 }

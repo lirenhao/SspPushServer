@@ -6,8 +6,10 @@ import javax.persistence.*;
 @Table(name = "T_L_APP_NOTIFY_ERR")
 public class NotifyErr {
 
-    // 发送的数据
     @Id
+    private String id;
+    // 发送的数据
+    @Column(length = 1024)
     private String notifydata;
     // 上次发送的时间
     @Column
@@ -15,6 +17,14 @@ public class NotifyErr {
     // 重复发送的次数
     @Column
     private int retryNo;
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
 
     public String getNotifydata() {
         return notifydata;
