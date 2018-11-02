@@ -64,12 +64,12 @@ public class PushService {
     @Async
     public void pushErr(String id, String notify) {
         Map<String, String> data = strToMap(notify);
-        List<Device> devices = deviceDao.findByDeviceNo(data.get("deviceNo"));
+        List<Device> devices = deviceDao.findByMerNoAndDeviceNo(data.get("merNo"), data.get("deviceNo"));
         if(devices.size() > 0) {
             data.put("id", id);
             push(devices, data);
         } else {
-            logger.warn("重发没有查询到设备信息,设备码是[{}]", data.get("deviceNo"));
+            logger.warn("重发时没有查询到设备信息,商户号是[{}],设备码是[{}]", data.get("merNo"), data.get("deviceNo"));
             notifyErrService.delete(data.get("id"));
         }
     }

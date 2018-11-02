@@ -10,5 +10,5 @@ public interface DeviceDao extends JpaRepository<Device, DevicePK> {
 
     List<Device> findByMerNo(String merNo);
 
-    List<Device> findByDeviceNo(String deviceNo);
+    List<Device> findByMerNoAndDeviceNo(String merNo, String deviceNo);
 }
