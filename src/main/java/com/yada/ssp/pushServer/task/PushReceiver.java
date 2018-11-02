@@ -45,7 +45,7 @@ public class PushReceiver {
             logger.info("数据库获取的发送错误信息 >>>[{}]", err.getNotifydata());
             if(!notifyErrService.isSending(err.getId())){
                 notifyErrService.setSending(err.getId());
-                pushService.pushErr(err.getNotifydata());
+                pushService.pushErr(err.getId(), err.getNotifydata());
             } else {
                 logger.info("发送错误信息已经在发送 >>>[{}]", err.getNotifydata());
             }

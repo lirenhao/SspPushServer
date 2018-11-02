@@ -62,14 +62,15 @@ public class PushService {
     }
 
     @Async
-    public void pushErr(String notify) {
+    public void pushErr(String id, String notify) {
         Map<String, String> data = strToMap(notify);
         List<Device> devices = deviceDao.findByDeviceNo(data.get("deviceNo"));
         if(devices.size() > 0) {
+            data.put("id", id);
             push(devices, data);
         } else {
             logger.warn("重发没有查询到设备信息,设备码是[{}]", data.get("deviceNo"));
-            notifyErrService.delete(notify);
+            notifyErrService.delete(data.get("id"));
         }
     }
 
@@ -103,14 +104,14 @@ public class PushService {
             if (!apnsClient.sendNotification(pushNotification).get().isAccepted()) {
                 logger.warn("APNS推送消息失败,设备码是[{}]", deviceToken);
                 // 存储数据库
-                notifyErrService.next(mapToStr(data));
+                notifyErrService.next(data.get("id"), mapToStr(data));
             } else {
-                notifyErrService.delete(mapToStr(data));
+                notifyErrService.delete(data.get("id"));
             }
         } catch (InterruptedException | ExecutionException e) {
             logger.warn("APNS推送消息异常,设备码是[{}],异常信息是[{}]", deviceToken, e.getMessage());
             // 存储数据库
-            notifyErrService.next(mapToStr(data));
+            notifyErrService.next(data.get("id"), mapToStr(data));
         }
     }
 
@@ -131,11 +132,11 @@ public class PushService {
 
         try {
             FirebaseMessaging.getInstance().sendAsync(message).get();
-            notifyErrService.delete(mapToStr(data));
+            notifyErrService.delete(data.get("id"));
         } catch (InterruptedException | ExecutionException e) {
             logger.warn("FCM推送消息异常,设备码是[{}],异常信息是[{}]", deviceToken, e.getMessage());
             // 存储数据库
-            notifyErrService.next(mapToStr(data));
+            notifyErrService.next(data.get("id"), mapToStr(data));
         }
     }
 

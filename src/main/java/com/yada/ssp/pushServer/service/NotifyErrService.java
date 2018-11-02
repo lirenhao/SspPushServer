@@ -6,9 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class NotifyErrService {
@@ -27,9 +25,13 @@ public class NotifyErrService {
      *
      * @param id 存储的数据
      */
-    void next(String id) {
+    void next(String id, String data) {
+        if (null == id || "".equals(id)) {
+            id = UUID.randomUUID().toString();
+        }
         NotifyErr err = notifyErrDao.findById(id).orElse(new NotifyErr());
-        err.setNotifydata(err.getNotifydata());
+        err.setId(id);
+        err.setNotifydata(data);
         err.setDatetime(sdf.format(new Date()));
         err.setRetryNo(err.getRetryNo() + 1);
         notifyErrDao.saveAndFlush(err);
@@ -56,14 +58,17 @@ public class NotifyErrService {
      * @param id 错误数据ID
      */
     void delete(String id) {
-        notifyErrDao.deleteById(id);
+        if (null != id && !"".equals(id)) {
+            notifyErrDao.findById(id).ifPresent(notifyErrDao::delete);
+        }
         // 发送结束删除发送状态
         sendList.remove(id);
     }
 
     /**
      * 数据是否正在发送
-     * @param id　数据ID
+     *
+     * @param id 　数据ID
      * @return true是正在发送
      */
     public boolean isSending(String id) {
@@ -72,7 +77,8 @@ public class NotifyErrService {
 
     /**
      * 设置数据正在发送
-     * @param id　数据ID
+     *
+     * @param id 　数据ID
      */
     public void setSending(String id) {
         sendList.add(id);
