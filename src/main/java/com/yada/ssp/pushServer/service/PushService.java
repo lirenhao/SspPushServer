@@ -1,13 +1,12 @@
 package com.yada.ssp.pushServer.service;
 
-import com.google.firebase.messaging.AndroidConfig;
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.Message;
-import com.google.firebase.messaging.Notification;
+import com.google.firebase.messaging.*;
 import com.turo.pushy.apns.ApnsClient;
 import com.turo.pushy.apns.DeliveryPriority;
+import com.turo.pushy.apns.PushNotificationResponse;
 import com.turo.pushy.apns.util.ApnsPayloadBuilder;
 import com.turo.pushy.apns.util.SimpleApnsPushNotification;
+import com.turo.pushy.apns.util.concurrent.PushNotificationResponseListener;
 import com.yada.ssp.pushServer.config.ApnsProperties;
 import com.yada.ssp.pushServer.config.FcmProperties;
 import com.yada.ssp.pushServer.config.MqProperties;
@@ -21,7 +20,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -65,7 +63,7 @@ public class PushService {
     public void pushErr(String id, String notify) {
         Map<String, String> data = strToMap(notify);
         List<Device> devices = deviceDao.findByMerNoAndDeviceNo(data.get("merNo"), data.get("deviceNo"));
-        if(devices.size() > 0) {
+        if (devices.size() > 0) {
             data.put("id", id);
             push(devices, data);
         } else {
@@ -74,7 +72,7 @@ public class PushService {
         }
     }
 
-    private void push(List<Device> devices, Map<String, String> data){
+    private void push(List<Device> devices, Map<String, String> data) {
         for (Device device : devices) {
             switch (device.getPushType()) {
                 case "FCM":
@@ -100,19 +98,22 @@ public class PushService {
                 deviceToken, apnsProperties.getTopic(), payload,
                 new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(1)), DeliveryPriority.IMMEDIATE,
                 data.get("tranNo"), UUID.randomUUID());
-        try {
-            if (!apnsClient.sendNotification(pushNotification).get().isAccepted()) {
-                logger.warn("APNS推送消息失败,设备码是[{}]", deviceToken);
-                // 存储数据库
-                notifyErrService.next(data.get("id"), mapToStr(data));
+
+        apnsClient.sendNotification(pushNotification).addListener((PushNotificationResponseListener<SimpleApnsPushNotification>) future -> {
+            if (future.isSuccess()) {
+                PushNotificationResponse resp = future.get();
+                if (resp.isAccepted()) {
+                    logger.info("APNS推送消息成功,设备码是[{}],返回信息是[{}]", deviceToken, resp.toString());
+                    notifyErrService.delete(data.get("id"));
+                } else {
+                    logger.warn("APNS推送消息被拒,设备码是[{}],拒绝原因是[{}]", deviceToken, resp.getRejectionReason());
+                    notifyErrService.next(data.get("id"), mapToStr(data));
+                }
             } else {
-                notifyErrService.delete(data.get("id"));
+                logger.warn("APNS推送消息失败,设备码是[{}],失败信息是[{}]", deviceToken, future.cause().getMessage());
+                notifyErrService.next(data.get("id"), mapToStr(data));
             }
-        } catch (InterruptedException | ExecutionException e) {
-            logger.warn("APNS推送消息异常,设备码是[{}],异常信息是[{}]", deviceToken, e.getMessage());
-            // 存储数据库
-            notifyErrService.next(data.get("id"), mapToStr(data));
-        }
+        });
     }
 
     public void sendFcm(String deviceToken, Map<String, String> data) {
@@ -131,10 +132,11 @@ public class PushService {
                 .build();
 
         try {
-            FirebaseMessaging.getInstance().sendAsync(message).get();
+            String resp = FirebaseMessaging.getInstance().send(message);
+            logger.info("FCM推送消息成功,设备码是[{}],返回信息是[{}]", deviceToken, resp);
             notifyErrService.delete(data.get("id"));
-        } catch (InterruptedException | ExecutionException e) {
-            logger.warn("FCM推送消息异常,设备码是[{}],异常信息是[{}]", deviceToken, e.getMessage());
+        } catch (FirebaseMessagingException e) {
+            logger.warn("FCM推送消息失败,设备码是[{}],失败信息是[{}]", deviceToken, e.getMessage());
             // 存储数据库
             notifyErrService.next(data.get("id"), mapToStr(data));
         }

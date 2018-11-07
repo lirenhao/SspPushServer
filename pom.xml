@@ -41,12 +41,12 @@
         <dependency>
             <groupId>com.google.firebase</groupId>
             <artifactId>firebase-admin</artifactId>
-            <version>6.3.0</version>
+            <version>6.5.0</version>
         </dependency>
         <dependency>
             <groupId>com.turo</groupId>
             <artifactId>pushy</artifactId>
-            <version>0.13.3</version>
+            <version>0.13.5</version>
         </dependency>
         <dependency>
             <groupId>com.oracle</groupId>
