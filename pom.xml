@@ -22,6 +22,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
+        <alpn-boot-version>8.1.12.v20180117</alpn-boot-version>
     </properties>
 
     <dependencies>
@@ -47,6 +48,16 @@
             <groupId>com.turo</groupId>
             <artifactId>pushy</artifactId>
             <version>0.13.5</version>
+        </dependency>
+        <dependency>
+            <groupId>com.clevertap.apns</groupId>
+            <artifactId>apns-http2</artifactId>
+            <version>1.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mortbay.jetty.alpn</groupId>
+            <artifactId>alpn-boot</artifactId>
+            <version>${alpn-boot-version}</version>
         </dependency>
         <dependency>
             <groupId>com.oracle</groupId>
@@ -77,8 +88,14 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>
+                        -Xbootclasspath/p:${settings.localRepository}/org/mortbay/jetty/alpn/alpn-boot/${alpn-boot-version}/alpn-boot-${alpn-boot-version}.jar
+                    </argLine>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
-
-
 </project>

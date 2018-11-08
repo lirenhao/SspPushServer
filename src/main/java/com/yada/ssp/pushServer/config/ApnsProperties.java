@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 public class ApnsProperties {
 
     private String env;
+    private String type;
     private String topic;
     private int invalidationTime;
     private int priority;
@@ -20,6 +21,14 @@ public class ApnsProperties {
 
     public void setEnv(String env) {
         this.env = env;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getTopic() {

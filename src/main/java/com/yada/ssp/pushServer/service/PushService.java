@@ -1,12 +1,7 @@
 package com.yada.ssp.pushServer.service;
 
 import com.google.firebase.messaging.*;
-import com.turo.pushy.apns.ApnsClient;
-import com.turo.pushy.apns.DeliveryPriority;
-import com.turo.pushy.apns.PushNotificationResponse;
-import com.turo.pushy.apns.util.ApnsPayloadBuilder;
-import com.turo.pushy.apns.util.SimpleApnsPushNotification;
-import com.turo.pushy.apns.util.concurrent.PushNotificationResponseListener;
+import com.yada.ssp.pushServer.client.ApnsClient;
 import com.yada.ssp.pushServer.config.ApnsProperties;
 import com.yada.ssp.pushServer.config.FcmProperties;
 import com.yada.ssp.pushServer.config.MqProperties;
@@ -19,8 +14,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
-import java.util.concurrent.TimeUnit;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -74,50 +70,27 @@ public class PushService {
 
     private void push(List<Device> devices, Map<String, String> data) {
         for (Device device : devices) {
+            data.put("deviceNo", device.getDeviceNo());
             switch (device.getPushType()) {
                 case "FCM":
-                    sendFcm(device.getDeviceNo(), data);
+                    sendFcm(data);
                     break;
                 case "APNS":
-                    sendApns(device.getDeviceNo(), data);
+                    sendApns(data);
                     break;
             }
         }
     }
 
-    public void sendApns(String deviceToken, Map<String, String> data) {
-        data.put("deviceNo", deviceToken);
-        ApnsPayloadBuilder payloadBuilder = new ApnsPayloadBuilder();
-        payloadBuilder.setAlertTitle(pushTitle);
-        payloadBuilder.setAlertBody(pushBody);
-        payloadBuilder.setContentAvailable(true);
-        payloadBuilder.addCustomProperty("data", data);
-
-        String payload = payloadBuilder.buildWithDefaultMaximumLength();
-        SimpleApnsPushNotification pushNotification = new SimpleApnsPushNotification(
-                deviceToken, apnsProperties.getTopic(), payload,
-                new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(1)), DeliveryPriority.IMMEDIATE,
-                data.get("tranNo"), UUID.randomUUID());
-
-        apnsClient.sendNotification(pushNotification).addListener((PushNotificationResponseListener<SimpleApnsPushNotification>) future -> {
-            if (future.isSuccess()) {
-                PushNotificationResponse resp = future.get();
-                if (resp.isAccepted()) {
-                    logger.info("APNS推送消息成功,设备码是[{}],返回信息是[{}]", deviceToken, resp.toString());
-                    notifyErrService.delete(data.get("id"));
-                } else {
-                    logger.warn("APNS推送消息被拒,设备码是[{}],拒绝原因是[{}]", deviceToken, resp.getRejectionReason());
-                    notifyErrService.next(data.get("id"), mapToStr(data));
-                }
-            } else {
-                logger.warn("APNS推送消息失败,设备码是[{}],失败信息是[{}]", deviceToken, future.cause().getMessage());
-                notifyErrService.next(data.get("id"), mapToStr(data));
-            }
-        });
+    public void sendApns(Map<String, String> data) {
+        if (apnsClient.send(pushTitle, pushBody, data)) {
+            notifyErrService.delete(data.get("id"));
+        } else {
+            notifyErrService.next(data.get("id"), mapToStr(data));
+        }
     }
 
-    public void sendFcm(String deviceToken, Map<String, String> data) {
-        data.put("deviceNo", deviceToken);
+    public void sendFcm(Map<String, String> data) {
         AndroidConfig androidConfig = AndroidConfig.builder()
                 .setTtl(fcmProperties.getTtl())
                 .setPriority(AndroidConfig.Priority.HIGH)
@@ -126,17 +99,17 @@ public class PushService {
 
         Message message = Message.builder()
                 .putAllData(data)
-                .setToken(deviceToken)
+                .setToken(data.get("deviceNo"))
                 .setAndroidConfig(androidConfig)
                 .setNotification(new Notification(pushTitle, pushBody))
                 .build();
 
         try {
             String resp = FirebaseMessaging.getInstance().send(message);
-            logger.info("FCM推送消息成功,设备码是[{}],返回信息是[{}]", deviceToken, resp);
+            logger.info("FCM推送消息成功,设备码是[{}],返回信息是[{}]", data.get("deviceNo"), resp);
             notifyErrService.delete(data.get("id"));
         } catch (FirebaseMessagingException e) {
-            logger.warn("FCM推送消息失败,设备码是[{}],失败信息是[{}]", deviceToken, e.getMessage());
+            logger.warn("FCM推送消息失败,设备码是[{}],失败信息是[{}]", data.get("deviceNo"), e.getMessage());
             // 存储数据库
             notifyErrService.next(data.get("id"), mapToStr(data));
         }
