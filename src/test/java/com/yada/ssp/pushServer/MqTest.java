@@ -27,7 +27,7 @@ public class MqTest {
         MQQueue putQueue = queueManager.accessQueue("99", CMQC.MQOO_OUTPUT);
 
         //新建并发送消息给队列
-        String tran = "10412341234123420180827185959                type         1          100  2                                                      1234567890    66666666";
+        String tran = "12345678901234520181102102659                type         1          100  2                                                      1234567890    66666666";
         MQMessage myMessage = new MQMessage();
         myMessage.writeString(tran);
 

@@ -22,7 +22,7 @@ public class PushConfig {
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @Bean
+    @Bean(destroyMethod = "close")
     public ApnsClient apnsClient(ApnsProperties apnsProperties, ProxyProperties proxyProperties)
             throws IOException, GeneralSecurityException {
         return new ApnsClient(apnsProperties, proxyProperties);

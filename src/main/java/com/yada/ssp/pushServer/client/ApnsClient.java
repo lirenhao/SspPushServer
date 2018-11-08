@@ -11,6 +11,7 @@ import com.turo.pushy.apns.util.SimpleApnsPushNotification;
 import com.yada.ssp.pushServer.config.ApnsProperties;
 import com.yada.ssp.pushServer.config.ProxyProperties;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.util.concurrent.Future;
 import okhttp3.OkHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,8 +113,8 @@ public class ApnsClient {
             String payload = payloadBuilder.buildWithDefaultMaximumLength();
             SimpleApnsPushNotification pushNotification = new SimpleApnsPushNotification(
                     data.get("deviceNo"), apnsProperties.getTopic(), payload,
-                    new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(1)), DeliveryPriority.IMMEDIATE,
-                    data.get("tranNo"), UUID.randomUUID());
+                    new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(apnsProperties.getInvalidationTime())),
+                    DeliveryPriority.IMMEDIATE, data.get("tranNo"), UUID.randomUUID());
 
             try {
                 PushNotificationResponse resp = nettyClient.sendNotification(pushNotification).get();
@@ -133,7 +134,6 @@ public class ApnsClient {
                     .alertBody(pushBody)
                     .contentAvailable(true)
                     .customField("data", data)
-                    .expiration(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(1))
                     .priority(Notification.Priority.IMMEDIATE)
                     .collapseId(data.get("tranNo"))
                     .uuid(UUID.randomUUID())
@@ -141,19 +141,20 @@ public class ApnsClient {
 
             NotificationResponse resp = okClient.push(notification);
             if (resp.getHttpStatusCode() == 200) {
-                logger.info("APNS推送消息成功,设备码是[{}],返回信息是[{}]", data.get("deviceNo"), resp.toString());
+                logger.info("APNS推送消息成功,设备码是[{}],返回信息是[{}]", data.get("deviceNo"), resp);
                 result = true;
             } else {
-                logger.warn("APNS推送消息失败,设备码是[{}],失败信息是[{}]", data.get("deviceNo"), resp.getCause().getMessage());
+                logger.warn("APNS推送消息失败,设备码是[{}],失败信息是[{}]", data.get("deviceNo"), resp);
             }
         }
-
         return result;
     }
 
-    public void close() {
+    public void close() throws InterruptedException {
         if (nettyClient != null) {
-            nettyClient.close();
+            nettyClient.close().await();
+        } else {
+            okClient.getHttpClient().connectionPool().evictAll();
         }
     }
 }

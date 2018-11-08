@@ -1,7 +1,7 @@
 package com.yada.ssp.pushServer.service;
 
-import com.turo.pushy.apns.ApnsClient;
 import com.yada.ssp.pushServer.PushServerApplication;
+import com.yada.ssp.pushServer.client.ApnsClient;
 import com.yada.ssp.pushServer.config.ApnsProperties;
 import com.yada.ssp.pushServer.config.FcmProperties;
 import com.yada.ssp.pushServer.config.MqProperties;
@@ -47,10 +47,10 @@ public class PushServiceTest {
 
     @Test
     public void tranToMap() {
-        String data = "10412341234123420180827185959                type         1          100  2                                                      1234567890    66666666";
+        String data = "12345678901234520180827185959                type         1          100  2                                                      1234567890    66666666";
         Map<String, String> tran = pushService.tranToMap(data);
 
-        Assert.assertEquals("104123412341234", tran.get("merNo"));
+        Assert.assertEquals("123456789012345", tran.get("merNo"));
         Assert.assertEquals("20180827185959", tran.get("tranDate"));
         Assert.assertEquals("type", tran.get("tranType"));
         Assert.assertEquals("1", tran.get("channel"));
@@ -63,14 +63,14 @@ public class PushServiceTest {
     @Test
     public void mapToStr() {
         Map<String, String> tran = new HashMap<>();
-        tran.put("merNo", "merNo");
-        tran.put("tranDate", "tranDate");
+        tran.put("merNo", "123456789012345");
+        tran.put("tranDate", "20181101185959");
         tran.put("tranType", "tranType");
-        tran.put("channel", "channel");
-        tran.put("tranAmt", "tranAmt");
+        tran.put("channel", "1");
+        tran.put("tranAmt", "100");
         tran.put("tranCry", "tranCry");
-        tran.put("tranNo", "tranNo");
-        tran.put("rrn", "rrn");
+        tran.put("tranNo", "1234567890");
+        tran.put("rrn", "66666666");
 
         String data = pushService.mapToStr(tran);
         Map<String, String> param = pushService.strToMap(data);
