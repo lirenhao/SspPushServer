@@ -15,12 +15,15 @@ public class ApnsTest {
             throws IOException, GeneralSecurityException, InterruptedException {
         ApnsProperties apnsProperties = new ApnsProperties();
         apnsProperties.setEnv("dev");
-        apnsProperties.setType("");
+        apnsProperties.setType("token");
         apnsProperties.setTopic("com.yada.sg.ssp");
         apnsProperties.setInvalidationTime(1);
         apnsProperties.setPriority(10);
         apnsProperties.setCertPath("apns-dev-cert.p12");
         apnsProperties.setCertPwd("yada");
+        apnsProperties.setKeyId("3T3527M3ZT");
+        apnsProperties.setTeamId("NY949M28FV");
+        apnsProperties.setAuthKey("MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQg6JjGFhEv0SlwQ1FSCZGpKFs8WwO21wWtWG6+SvugSuugCgYIKoZIzj0DAQehRANCAAS4XujXYi4xUNab8juH9/lCFF5SG6G67VnG5zLgPQhP5UORtUe278TcMa9RYbkKJLqlFjqbZktmd9lSJOUGRlBP");
 
         ProxyProperties proxyProperties = new ProxyProperties();
         proxyProperties.setEnabled(false);

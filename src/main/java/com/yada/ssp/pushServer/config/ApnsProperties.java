@@ -14,6 +14,9 @@ public class ApnsProperties {
     private int priority;
     private String certPath;
     private String certPwd;
+    private String keyId;
+    private String teamId;
+    private String authKey;
 
     public String getEnv() {
         return env;
@@ -69,5 +72,29 @@ public class ApnsProperties {
 
     public void setCertPwd(String certPwd) {
         this.certPwd = certPwd;
+    }
+
+    public String getKeyId() {
+        return keyId;
+    }
+
+    public void setKeyId(String keyId) {
+        this.keyId = keyId;
+    }
+
+    public String getTeamId() {
+        return teamId;
+    }
+
+    public void setTeamId(String teamId) {
+        this.teamId = teamId;
+    }
+
+    public String getAuthKey() {
+        return authKey;
+    }
+
+    public void setAuthKey(String authKey) {
+        this.authKey = authKey;
     }
 }
