@@ -32,10 +32,9 @@ public class PushReceiver {
     private int errExpire;
 
     @JmsListener(destination = "${mq.tranQueue}", containerFactory = "mqFactory")
-    public void tranMessage(byte[] msg) {
-        String notify = new String(msg);
-        logger.info("MQ获取的信息[{}]", notify);
-        pushService.push(notify);
+    public void tranMessage(String msg) {
+        logger.info("MQ获取的信息[{}]", msg);
+        pushService.push(msg);
     }
 
     @Scheduled(fixedRateString = "${notify.err.rate}")
