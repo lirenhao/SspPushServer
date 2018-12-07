@@ -97,19 +97,25 @@ public class PushService {
                 .setCollapseKey(data.get("tranNo"))
                 .build();
 
+        String deviceNo = data.get("deviceNo");
+        data.remove("deviceNo");
+
         Message message = Message.builder()
                 .putAllData(data)
-                .setToken(data.get("deviceNo"))
+                .putData("title", pushTitle)
+                .putData("message", pushBody)
+                .putData("notId", data.get("tranNo"))
+                .putData("content-available", "1")
+                .setToken(deviceNo)
                 .setAndroidConfig(androidConfig)
-                .setNotification(new Notification(pushTitle, pushBody))
                 .build();
 
         try {
             String resp = FirebaseMessaging.getInstance().send(message);
-            logger.info("FCM推送消息成功,设备码是[{}],返回信息是[{}]", data.get("deviceNo"), resp);
+            logger.info("FCM推送消息成功,设备码是[{}],返回信息是[{}]", deviceNo, resp);
             notifyErrService.delete(data.get("id"));
         } catch (FirebaseMessagingException e) {
-            logger.warn("FCM推送消息失败,设备码是[{}],失败信息是[{}]", data.get("deviceNo"), e.getMessage());
+            logger.warn("FCM推送消息失败,设备码是[{}],失败信息是[{}]", deviceNo, e.getMessage());
             // 存储数据库
             notifyErrService.next(data.get("id"), mapToStr(data));
         }
