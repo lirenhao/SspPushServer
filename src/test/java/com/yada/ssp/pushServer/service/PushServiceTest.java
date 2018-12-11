@@ -56,7 +56,7 @@ public class PushServiceTest {
         Assert.assertEquals("1", tran.get("channel"));
         Assert.assertEquals("100", tran.get("tranAmt"));
         Assert.assertEquals("2", tran.get("tranCry"));
-        Assert.assertEquals("1234567890", tran.get("tranNo"));
+        Assert.assertEquals("1234567890", tran.get("traceNo"));
         Assert.assertEquals("66666666", tran.get("rrn"));
     }
 
@@ -69,7 +69,7 @@ public class PushServiceTest {
         tran.put("channel", "1");
         tran.put("tranAmt", "100");
         tran.put("tranCry", "tranCry");
-        tran.put("tranNo", "1234567890");
+        tran.put("traceNo", "1234567890");
         tran.put("rrn", "66666666");
 
         String data = pushService.mapToStr(tran);
@@ -81,7 +81,7 @@ public class PushServiceTest {
         Assert.assertEquals(tran.get("channel"), param.get("channel"));
         Assert.assertEquals(tran.get("tranAmt"), param.get("tranAmt"));
         Assert.assertEquals(tran.get("tranCry"), param.get("tranCry"));
-        Assert.assertEquals(tran.get("tranNo"), param.get("tranNo"));
+        Assert.assertEquals(tran.get("traceNo"), param.get("traceNo"));
         Assert.assertEquals(tran.get("rrn"), param.get("rrn"));
     }
 
