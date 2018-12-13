@@ -25,21 +25,35 @@ public class FcmTest {
 
         FirebaseOptions options = new FirebaseOptions.Builder()
                 .setCredentials(GoogleCredentials.fromStream(new ClassPathResource("serviceAccountKey.json").getInputStream()))
-                .setHttpTransport(new NetHttpTransport.Builder().doNotValidateCertificate().setProxy(proxy).build())
+                // .setHttpTransport(new NetHttpTransport.Builder().doNotValidateCertificate().setProxy(proxy).build())
                 .build();
         FirebaseApp.initializeApp(options);
 
+        Map<String, String> data = new HashMap<>();
+        data.put("merNo", "123456789012345");
+        data.put("tranDate", "20181207105959");
+        data.put("tranType", "1");
+        data.put("channel", "Union Pay");
+        data.put("tranAmt", "100.00");
+        data.put("tranCry", "SGD");
+        data.put("traceNo", "20181204105959001");
+        data.put("rrn", "66666666");
+        String deviceNo = "ftxJn3_D-4U:APA91bG7K9CtuAKT7oj5PTgCC51C0_QFTPou4NEldNpyuqpMrAHzwAtPBHV-omvMYinfKOCEgKzYs8a7PB_4rEgv740A5yBsEOtnmXOSNetL8SkkFzyjuWKhmqbVT4AptQ5Vvpx3JIJX";
+
         AndroidConfig androidConfig = AndroidConfig.builder()
-                .setTtl(100)
+                .setTtl(0)
                 .setPriority(AndroidConfig.Priority.HIGH)
+                .setCollapseKey(data.get("traceNo"))
                 .build();
 
-        Map<String, String> data = new HashMap<>();
-        data.put("content-available", "1");
-        String token = "ftxJn3_D-4U:APA91bG7K9CtuAKT7oj5PTgCC51C0_QFTPou4NEldNpyuqpMrAHzwAtPBHV-omvMYinfKOCEgKzYs8a7PB_4rEgv740A5yBsEOtnmXOSNetL8SkkFzyjuWKhmqbVT4AptQ5Vvpx3JIJX";
-        Message message = Message.builder().putAllData(data).setToken(token)
+        Message message = Message.builder()
+                .putAllData(data)
+                .putData("title", "pushTitle")
+                .putData("message", "pushBody")
+                .putData("notId", data.get("traceNo"))
+                .putData("content-available", "1")
+                .setToken(deviceNo)
                 .setAndroidConfig(androidConfig)
-                .setNotification(new Notification("Title", "This is body"))
                 .build();
 
         String response = FirebaseMessaging.getInstance().sendAsync(message).get();

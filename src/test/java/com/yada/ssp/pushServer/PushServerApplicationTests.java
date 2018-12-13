@@ -19,16 +19,16 @@ public class PushServerApplicationTests {
 
     @Test
     public void sendFcm() {
-        String token = "deia5e_zLPs:APA91bF9DMTsXAfVlxHl_Vk_cTN2mQp3F7-kTtM8VxCuH7ZjPe0KGDIGvvwuXUYVr0xvyfJWhshJ-zPE1ZwyEq0ZgWzLqrlZUt94-B1dUASqzLVFTfDQl0l9HZLql-42SXhplw4hEBtWCRNbsHFDFHOANWvi63CXoA";
+        String token = "ftxJn3_D-4U:APA91bG7K9CtuAKT7oj5PTgCC51C0_QFTPou4NEldNpyuqpMrAHzwAtPBHV-omvMYinfKOCEgKzYs8a7PB_4rEgv740A5yBsEOtnmXOSNetL8SkkFzyjuWKhmqbVT4AptQ5Vvpx3JIJX";
         Map<String, String> data = new HashMap<>();
         data.put("deviceNo", token);
-        data.put("merNo", "104");
+        data.put("merNo", "104767011000006");
         data.put("tranDate", "20180907162134");
         data.put("tranType", "tranType");
-        data.put("channel", "channel");
+        data.put("channel", "Union Pay");
         data.put("tranAmt", "10.00");
         data.put("tranCry", "￥");
-        data.put("tranNo", "201809021648230002");
+        data.put("traceNo", "201812071648230002");
         data.put("rrn", "rrn");
         pushService.sendFcm(data);
     }
@@ -44,7 +44,7 @@ public class PushServerApplicationTests {
         data.put("channel", "微信支付");
         data.put("tranAmt", "10.00");
         data.put("tranCry", "￥");
-        data.put("tranNo", "201809140848230001");
+        data.put("traceNo", "201809140848230001");
         data.put("rrn", "rrn");
         pushService.sendApns(data);
     }

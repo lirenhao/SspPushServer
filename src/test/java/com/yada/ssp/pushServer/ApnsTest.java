@@ -40,7 +40,7 @@ public class ApnsTest {
         data.put("channel", "扫码支付");
         data.put("tranAmt", "1.00");
         data.put("tranCry", "CNY");
-        data.put("tranNo", "1234567890");
+        data.put("traceNo", "1234567890");
         data.put("rrn", "66666666");
 
         apnsClient.send("Test", "This is test", data);
