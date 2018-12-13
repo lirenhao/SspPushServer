@@ -13,6 +13,9 @@ public class Device {
     //登录名
     @Id
     private String loginName;
+    //终端号
+    @Column
+    private String termNo;
     //设备号
     @Column
     private String deviceNo;
@@ -22,6 +25,9 @@ public class Device {
     //推送平台 Android、iOS
     @Column
     private String platform;
+    //推送标记 0-按终端推送 1-按商户推送
+    @Column
+    private String pushFlag;
 
     public String getMerNo() {
         return merNo;
@@ -37,6 +43,14 @@ public class Device {
 
     public void setLoginName(String loginName) {
         this.loginName = loginName;
+    }
+
+    public String getTermNo() {
+        return termNo;
+    }
+
+    public void setTermNo(String termNo) {
+        this.termNo = termNo;
     }
 
     public String getDeviceNo() {
@@ -61,5 +75,13 @@ public class Device {
 
     public void setPlatform(String platform) {
         this.platform = platform;
+    }
+
+    public String getPushFlag() {
+        return pushFlag;
+    }
+
+    public void setPushFlag(String pushFlag) {
+        this.pushFlag = pushFlag;
     }
 }

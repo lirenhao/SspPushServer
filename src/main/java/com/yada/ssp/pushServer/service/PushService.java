@@ -51,19 +51,20 @@ public class PushService {
     @Async
     public void push(String notify) {
         Map<String, String> data = tranToMap(notify);
-        List<Device> devices = deviceDao.findByMerNo(data.get("merNo"));
+        List<Device> devices = deviceDao.findDevices(data.get("merNo"), data.get("termNo"));
         push(devices, data);
     }
 
     @Async
     public void pushErr(String id, String notify) {
         Map<String, String> data = strToMap(notify);
-        List<Device> devices = deviceDao.findByMerNoAndDeviceNo(data.get("merNo"), data.get("deviceNo"));
+        List<Device> devices = deviceDao.findByTermNoAndDeviceNo(data.get("termNo"), data.get("deviceNo"));
         if (devices.size() > 0) {
             data.put("id", id);
             push(devices, data);
         } else {
-            logger.warn("重发时没有查询到设备信息,商户号是[{}],设备码是[{}]", data.get("merNo"), data.get("deviceNo"));
+            logger.warn("重发时没有查询到设备信息,商户号是[{}],终端号是[{}],设备码是[{}]",
+                    data.get("merNo"), data.get("termNo"), data.get("deviceNo"));
             notifyErrService.delete(data.get("id"));
         }
     }
