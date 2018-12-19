@@ -95,7 +95,7 @@ public class PushService {
         AndroidConfig androidConfig = AndroidConfig.builder()
                 .setTtl(fcmProperties.getTtl())
                 .setPriority(AndroidConfig.Priority.HIGH)
-                .setCollapseKey(data.get("traceNo"))
+                .setCollapseKey(data.get("lsId"))
                 .build();
 
         String deviceNo = data.get("deviceNo");
@@ -105,7 +105,7 @@ public class PushService {
                 .putAllData(data)
                 .putData("title", pushTitle)
                 .putData("message", pushBody)
-                .putData("notId", data.get("traceNo"))
+                .putData("notId", data.get("lsId"))
                 .putData("content-available", "1")
                 .setToken(deviceNo)
                 .setAndroidConfig(androidConfig)

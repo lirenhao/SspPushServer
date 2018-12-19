@@ -137,7 +137,7 @@ public class ApnsClient {
             SimpleApnsPushNotification pushNotification = new SimpleApnsPushNotification(
                     data.get("deviceNo"), apnsProperties.getTopic(), payload,
                     new Date(System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(apnsProperties.getInvalidationTime())),
-                    DeliveryPriority.IMMEDIATE, data.get("traceNo"), UUID.randomUUID());
+                    DeliveryPriority.IMMEDIATE, data.get("lsId"), UUID.randomUUID());
 
             try {
                 PushNotificationResponse resp = nettyClient.sendNotification(pushNotification).get();
@@ -158,7 +158,7 @@ public class ApnsClient {
                     .contentAvailable(true)
                     .customField("data", data)
                     .priority(Notification.Priority.IMMEDIATE)
-                    .collapseId(data.get("traceNo"))
+                    .collapseId(data.get("lsId"))
                     .uuid(UUID.randomUUID())
                     .build();
 
