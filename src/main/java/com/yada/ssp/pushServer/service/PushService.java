@@ -1,8 +1,10 @@
 package com.yada.ssp.pushServer.service;
 
-import com.google.firebase.messaging.*;
+import com.google.firebase.messaging.AndroidConfig;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.FirebaseMessagingException;
+import com.google.firebase.messaging.Message;
 import com.yada.ssp.pushServer.client.ApnsClient;
-import com.yada.ssp.pushServer.config.ApnsProperties;
 import com.yada.ssp.pushServer.config.FcmProperties;
 import com.yada.ssp.pushServer.config.MqProperties;
 import com.yada.ssp.pushServer.dao.DeviceDao;
@@ -34,17 +36,15 @@ public class PushService {
     private final ApnsClient apnsClient;
     private final NotifyErrService notifyErrService;
     private final MqProperties mqProperties;
-    private final ApnsProperties apnsProperties;
     private final FcmProperties fcmProperties;
 
     @Autowired
     public PushService(DeviceDao deviceDao, ApnsClient apnsClient, NotifyErrService notifyErrService,
-                       MqProperties mqProperties, ApnsProperties apnsProperties, FcmProperties fcmProperties) {
+                       MqProperties mqProperties, FcmProperties fcmProperties) {
         this.deviceDao = deviceDao;
         this.apnsClient = apnsClient;
         this.notifyErrService = notifyErrService;
         this.mqProperties = mqProperties;
-        this.apnsProperties = apnsProperties;
         this.fcmProperties = fcmProperties;
     }
 
@@ -58,7 +58,7 @@ public class PushService {
     @Async
     public void pushErr(String id, String notify) {
         Map<String, String> data = strToMap(notify);
-        List<Device> devices = deviceDao.findByTermNoAndDeviceNo(data.get("termNo"), data.get("deviceNo"));
+        List<Device> devices = deviceDao.findDevices(data.get("merNo"), data.get("termNo"), data.get("deviceNo"));
         if (devices.size() > 0) {
             data.put("id", id);
             push(devices, data);
@@ -116,8 +116,10 @@ public class PushService {
             logger.info("FCM推送消息成功,设备码是[{}],返回信息是[{}]", deviceNo, resp);
             notifyErrService.delete(data.get("id"));
         } catch (FirebaseMessagingException e) {
+            e.printStackTrace();
             logger.warn("FCM推送消息失败,设备码是[{}],失败信息是[{}]", deviceNo, e.getMessage());
             // 存储数据库
+            data.put("deviceNo", deviceNo);
             notifyErrService.next(data.get("id"), mapToStr(data));
         }
     }

@@ -12,5 +12,6 @@ public interface DeviceDao extends JpaRepository<Device, DevicePK> {
     @Query("SELECT d FROM Device d WHERE d.merNo = ?1 AND (d.termNo  = ?2 or d.pushFlag = '1')")
     List<Device> findDevices(String merNo, String TermNo);
 
-    List<Device> findByTermNoAndDeviceNo(String termNo, String deviceNo);
+    @Query("SELECT d FROM Device d WHERE d.merNo = ?1 AND (d.termNo  = ?2 or d.pushFlag = '1') AND d.deviceNo = ?3")
+    List<Device> findDevices(String merNo, String termNo, String deviceNo);
 }
